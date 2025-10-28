@@ -1,0 +1,87 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 3D Metallic gradient -->
+    <linearGradient id="metallicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+      <stop offset="15%" stopColor="#f8f8f8" stopOpacity="0.98" />
+      <stop offset="35%" stopColor="#e8e8e8" stopOpacity="0.95" />
+      <stop offset="65%" stopColor="#d0d0d0" stopOpacity="0.9" />
+      <stop offset="85%" stopColor="#b8b8b8" stopOpacity="0.85" />
+      <stop offset="100%" stopColor="#a0a0a0" stopOpacity="0.8" />
+    </linearGradient>
+    
+    <!-- Drop shadow filter -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"/>
+      <feOffset dx="1" dy="2" result="offset"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+      <feMerge> 
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Metallic shine filter -->
+    <filter id="metallicShine">
+      <feGaussianBlur stdDeviation="0.3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Drop shadow for the triquetra -->
+  <g transform="translate(12, 12)">
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="#000000" opacity="0.2" filter="url(#dropShadow)" />
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="#000000" opacity="0.2" filter="url(#dropShadow)" 
+          transform="rotate(120 30 30)" />
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="#000000" opacity="0.2" filter="url(#dropShadow)" 
+          transform="rotate(240 30 30)" />
+  </g>
+  
+  <!-- Main triquetra - three interlocking curved elements -->
+  <g transform="translate(12, 12)">
+    <!-- First curved element -->
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="url(#metallicGradient)" 
+          stroke="#d0d0d0" 
+          strokeWidth="0.5" 
+          filter="url(#metallicShine)" />
+    
+    <!-- Second curved element -->
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="url(#metallicGradient)" 
+          stroke="#d0d0d0" 
+          strokeWidth="0.5" 
+          filter="url(#metallicShine)"
+          transform="rotate(120 30 30)" />
+    
+    <!-- Third curved element -->
+    <path d="M30 5C22 5 15 12 15 20C15 28 22 35 30 35C38 35 45 28 45 20C45 12 38 5 30 5Z" 
+          fill="url(#metallicGradient)" 
+          stroke="#d0d0d0" 
+          strokeWidth="0.5" 
+          filter="url(#metallicShine)"
+          transform="rotate(240 30 30)" />
+  </g>
+  
+  <!-- RPR Text -->
+  <text x="75" y="45" 
+        fontFamily="Arial, Helvetica, sans-serif" 
+        fontWeight="700" 
+        fontSize="38" 
+        fill="url(#metallicGradient)" 
+        letterSpacing="6" 
+        filter="url(#metallicShine)">
+    RPR
+  </text>
+  
+  <!-- Underline -->
+  <rect x="75" y="50" width="120" height="3" fill="url(#metallicGradient)" filter="url(#metallicShine)" />
+</svg>

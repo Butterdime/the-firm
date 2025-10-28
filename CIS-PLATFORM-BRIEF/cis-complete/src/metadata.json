@@ -1,0 +1,7 @@
+{
+  "name": "CIS COMPLETE",
+  "description": "A app that scans a document and turns it into a Customer Information Sheet",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

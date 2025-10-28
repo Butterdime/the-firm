@@ -1,0 +1,53 @@
+Excellent. Here is a refined prompt that you can provide to a Google AI image generation tool (like Midjourney or DALL-E 3, accessed via tools like Image Creator from Microsoft Designer) or a design AI to create the visual template for your specific four-section "CIS Customer Information Sheet" report.
+
+Prompt for Google AI:
+
+"Create a design template for a modern, one-page fintech "CIS Customer Information Sheet" report to be delivered as a PDF. The design must be clean, professional, and reflect a trustworthy and innovative financial services brand.
+
+Key Design Specifications:
+
+Color Palette: Use a sophisticated and modern palette. The primary colors should be deep navy blue (#0A2342) and cool gray (#BCC6D1). Use a vibrant teal (#00A896) as an accent color for headings, icons, and data visualization elements to draw attention. The background should be a clean white (#FFFFFF).
+
+Font Style: Use a single sans-serif font family for the entire document to ensure a clean and modern feel. The primary font should be 'Inter' or a similar font like 'Lato'.
+
+Headings (e.g., "Proof of Identification"): Bold, 16pt, in the deep navy blue color.
+
+Sub-headings (e.g., "Document Status"): Medium weight, 12pt, in cool gray.
+
+Body Text: Regular, 11pt, in a dark gray (#333333) for high readability.
+
+Composition and Layout:
+
+The layout should be a four-quadrant grid or a four-card vertical layout on a single A4 page. Each of the four sections must be clearly separated and visually distinct, perhaps using light gray borders or subtle drop shadows on the cards.
+
+Incorporate a clean header with the company logo on the left and the document title "CIS | Customer Information Sheet" on the right.
+
+Use simple, universally understood line icons next to each of the four section titles. For example:
+
+Proof of Identification: An ID card icon.
+
+Proof of Address: A map pin or house icon.
+
+ABN Statement: A document or building icon.
+
+Source of Funds: A money or flow chart icon.
+
+Treatment of the Final PDF:
+
+The final output should look like a polished, high-fidelity PDF report, not a website or app screen.
+
+It must have a professional and uncluttered aesthetic. There should be ample white space to avoid a cramped feeling.
+
+Include placeholder data visualization elements. For instance, under "Proof of Identification," show a field for "Verification Status" with a green "Verified" tag next to it to demonstrate how status updates would look. For "Source of Funds," a simple, clean bar chart or pie chart placeholder would be ideal to show expected transaction types or sources.
+
+The four required sections are, and must be titled exactly as:
+
+Proof of Identification
+
+Proof of Address
+
+ABN Statement
+
+Source of Funds
+
+Do not include any other sections. The design should be purely a visual template ready for data entry."

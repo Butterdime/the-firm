@@ -1,0 +1,5 @@
+# Uploads Directory
+
+This directory stores temporarily uploaded documents during verification.
+
+Files are automatically cleaned up after processing.
