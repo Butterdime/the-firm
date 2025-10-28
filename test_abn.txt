@@ -1,0 +1,8 @@
+Business Registration Document
+
+ABN: 16 920 472 163
+ACN: 123 456 789
+Business Name: ACME PTY LTD
+
+This is a test document to verify ABN normalization.
+The ABN contains spaces which should be normalized during processing.
