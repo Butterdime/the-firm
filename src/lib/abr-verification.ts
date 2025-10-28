@@ -23,8 +23,8 @@ export interface ABRResult {
  */
 export async function queryABR(abn: string): Promise<ABRResult> {
   try {
-    // Clean ABN (remove spaces/hyphens)
-    const cleanABN = abn.replace(/[\s\-]/g, '');
+    // Clean ABN (remove spaces/hyphens/periods)
+    const cleanABN = abn.replace(/[\s\-\.]/g, '');
     
     if (cleanABN.length !== 11 || !/^\d+$/.test(cleanABN)) {
       return {
