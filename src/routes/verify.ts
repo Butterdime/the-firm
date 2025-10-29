@@ -10,9 +10,9 @@ import { logAuditEvent } from '../lib/audit-logger';
 
 const router = Router();
 
-// Configure multer for file uploads
+// Configure multer for file uploads (serverless - use memory storage)
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.memoryStorage(), // Use memory storage for serverless
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },

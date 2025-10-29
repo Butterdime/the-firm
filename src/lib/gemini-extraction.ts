@@ -15,17 +15,30 @@ export interface ExtractedData {
 /**
  * Extract business entity data from document using Gemini 2.5 Flash
  * CRITICAL: This is the first step in trilogy verification
+ * @param filePathOrBuffer - File path (string) or Buffer from memory storage
+ * @param mimeTypeHint - Optional MIME type when using Buffer
  */
-export async function extractFromDocument(filePath: string): Promise<ExtractedData> {
+export async function extractFromDocument(
+  filePathOrBuffer: string | Buffer, 
+  mimeTypeHint?: string
+): Promise<ExtractedData> {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
-    // Read file and convert to base64
-    const fileBuffer = fs.readFileSync(filePath);
-    const base64Data = fileBuffer.toString('base64');
+    // Handle both file path and buffer
+    let base64Data: string;
+    let mimeType: string;
     
-    // Determine MIME type from file extension
-    const mimeType = getMimeType(filePath);
+    if (Buffer.isBuffer(filePathOrBuffer)) {
+      // Buffer from memory storage (serverless)
+      base64Data = filePathOrBuffer.toString('base64');
+      mimeType = mimeTypeHint || 'application/pdf';
+    } else {
+      // File path (local development)
+      const fileBuffer = fs.readFileSync(filePathOrBuffer);
+      base64Data = fileBuffer.toString('base64');
+      mimeType = getMimeType(filePathOrBuffer);
+    }
     
     const prompt = `Extract Australian business entity information from this document.
 

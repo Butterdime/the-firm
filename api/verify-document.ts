@@ -7,9 +7,9 @@ import { queryABR } from '../src/lib/abr-verification';
 import { verifyTrilogy, checkStaleness } from '../src/lib/trilogy-verification';
 import { logAuditEvent } from '../src/lib/audit-logger';
 
-// Configure multer for file uploads
+// Configure multer for file uploads (serverless - use memory storage)
 const upload = multer({
-  dest: '/tmp/uploads/',
+  storage: multer.memoryStorage(), // Use memory storage for serverless
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -56,20 +56,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const filePath = file.path;
     const filename = file.originalname;
+    const fileBuffer = file.buffer; // Buffer from memory storage
+    const mimeType = file.mimetype;
 
     // Step 1: Create document record
     const documentResult = await pool.query(
       `INSERT INTO documents (filename, file_path, file_size, mime_type, status)
        VALUES ($1, $2, $3, $4, 'processing')
        RETURNING id`,
-      [filename, filePath, file.size, file.mimetype]
+      [filename, 'memory-storage', file.size, mimeType]
     );
     documentId = documentResult.rows[0].id;
 
-    // Step 2: Extract entity data using Gemini Vision
-    const extracted = await extractFromDocument(filePath);
+    // Step 2: Extract entity data using Gemini Vision (pass buffer directly)
+    const extracted = await extractFromDocument(fileBuffer, mimeType);
 
     await logAuditEvent({
       document_id: documentId,
