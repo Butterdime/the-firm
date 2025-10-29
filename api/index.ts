@@ -1,9 +1,10 @@
-import express from 'express';
-import cors from 'cors';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import express, { Express } from 'express';
+import cors from 'cors';
 import verifyRouter from '../src/routes/verify';
 
-const app = express();
+// Create Express app
+const app: Express = express();
 
 // Middleware
 app.use(cors());
@@ -37,6 +38,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// Export handler for Vercel
-export default app;
+// Vercel serverless function handler
+export default (req: VercelRequest, res: VercelResponse) => {
+  return app(req as any, res as any);
+};
 
