@@ -1,6 +1,6 @@
-import { verifyTrilogy } from '../src/lib/trilogy-verification';
-import { ExtractedData } from '../src/lib/gemini-extraction';
-import { ABRResult } from '../src/lib/abr-verification';
+import { verifyTrilogy } from '../lib/trilogy-verification';
+import { ExtractedData } from '../lib/gemini-extraction';
+import { ABRResult } from '../lib/abr-verification';
 
 describe('Trilogy Verification Edge Cases', () => {
   test('perfect match should pass', () => {
@@ -223,7 +223,7 @@ describe('Trilogy Verification Edge Cases', () => {
 
 describe('ABN Normalization - Formatted Inputs', () => {
   // Import queryABR for direct testing
-  const { queryABR } = require('../src/lib/abr-verification');
+  const { queryABR } = require('../lib/abr-verification');
 
   test('ABN with periods should be normalized', async () => {
     // Note: This is a mock test - in real scenario would need to mock fetch
