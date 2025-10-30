@@ -1,16 +1,12 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api"
+    },
+    {
       "source": "/health",
-      "destination": "/api"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/api"
+      "destination": "/api/health"
     }
   ]
 }
