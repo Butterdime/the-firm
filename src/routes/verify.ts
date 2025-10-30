@@ -52,20 +52,21 @@ router.post('/verify-document', upload.single('document'), async (req: Request, 
       });
     }
 
-    const filePath = req.file.path;
     const filename = req.file.originalname;
+    const fileBuffer = req.file.buffer; // Buffer from memory storage
+    const mimeType = req.file.mimetype;
 
     // Step 1: Create document record
     const documentResult = await pool.query(
       `INSERT INTO documents (filename, file_path, file_size, mime_type, status)
        VALUES ($1, $2, $3, $4, 'processing')
        RETURNING id`,
-      [filename, filePath, req.file.size, req.file.mimetype]
+      [filename, 'memory-storage', req.file.size, mimeType]
     );
     documentId = documentResult.rows[0].id;
 
-    // Step 2: Extract entity data using Gemini Vision
-    const extracted = await extractFromDocument(filePath);
+    // Step 2: Extract entity data using Gemini Vision (pass buffer directly)
+    const extracted = await extractFromDocument(fileBuffer, mimeType);
 
     await logAuditEvent({
       document_id: documentId,
