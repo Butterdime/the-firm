@@ -27,6 +27,56 @@
 
 ---
 
+## TASK 0: Pre-Deployment Build Verification 🔍 RECOMMENDED
+
+**Why**: Catch TypeScript compilation issues before merging to prevent failed deployments
+
+**Action Steps**:
+
+```bash
+# Navigate to project directory
+cd the-firm
+
+# Ensure you're on the correct branch
+git checkout claude/cis-security-audit-report-011CUcnea5CDCE8NQ9K9wWkw
+git pull origin claude/cis-security-audit-report-011CUcnea5CDCE8NQ9K9wWkw
+
+# Install dependencies
+npm install
+
+# Run TypeScript build
+npm run build
+
+# Expected output:
+# ✓ Successfully compiled
+# ✓ No errors
+```
+
+**What to check**:
+- [ ] Build completes without errors
+- [ ] No TypeScript compilation errors
+- [ ] dist/ directory created successfully
+- [ ] All source files compiled to JavaScript
+
+**If build fails**:
+1. Read the error messages carefully
+2. Fix any TypeScript errors in the codebase
+3. Commit and push fixes
+4. Re-run build verification
+
+**Verification**:
+```bash
+# Check that compiled files exist
+ls -la dist/
+# Should show: server.js, routes/, lib/, config/ directories
+
+# Quick syntax check
+node -c dist/server.js
+# Should output nothing (no syntax errors)
+```
+
+---
+
 ## TASK 1: Merge Pull Request ⚡ CRITICAL
 
 **Why**: The main branch has buggy code. Our branch has the fix.
@@ -149,10 +199,64 @@ const extracted = await extractFromDocument(fileBuffer, mimeType);
 4. Click "Save"
 5. Repeat for all variables
 
-**Verification**:
+**Environment Variable Validation Script**:
+
+After adding all variables, verify they're set correctly:
+
 ```bash
-# After adding variables, redeploy if needed:
-# Vercel dashboard → Deployments → Latest → Three dots → Redeploy
+# Create validation script
+cat > validate-env.sh << 'EOF'
+#!/bin/bash
+echo "🔍 Validating Environment Variables..."
+
+# Required variables
+REQUIRED_VARS=("GEMINI_API_KEY" "DATABASE_URL" "NODE_ENV")
+MISSING=()
+
+for var in "${REQUIRED_VARS[@]}"; do
+  # Check if variable is set in Vercel (you'll need to verify manually)
+  echo "✓ Check $var in Vercel dashboard"
+done
+
+# Test DATABASE_URL format
+if [[ ! -z "$DATABASE_URL" ]]; then
+  if [[ $DATABASE_URL =~ ^postgresql:// ]]; then
+    echo "✅ DATABASE_URL format looks correct"
+  else
+    echo "❌ DATABASE_URL should start with postgresql://"
+  fi
+fi
+
+# Test GEMINI_API_KEY format
+if [[ ! -z "$GEMINI_API_KEY" ]]; then
+  if [[ $GEMINI_API_KEY =~ ^AIza ]]; then
+    echo "✅ GEMINI_API_KEY format looks correct"
+  else
+    echo "⚠️  GEMINI_API_KEY should start with 'AIza'"
+  fi
+fi
+
+echo "✅ Manual verification required in Vercel dashboard"
+EOF
+
+chmod +x validate-env.sh
+./validate-env.sh
+```
+
+**Manual Verification in Vercel**:
+1. Go to Vercel → Settings → Environment Variables
+2. Verify each variable shows:
+   - ✓ Green checkmark (set correctly)
+   - Environment: Production, Preview, Development
+   - No "(not set)" or error indicators
+
+**Test Environment Variables After Deployment**:
+```bash
+# After deployment, test that API has access to variables
+curl https://the-firm.vercel.app/api/health
+
+# If you get errors about missing env vars, redeploy:
+# Vercel dashboard → Deployments → Latest → Redeploy
 ```
 
 ---
@@ -504,6 +608,232 @@ Document what was done:
 2. Verify extracted data matches ABR data exactly (case-sensitive)
 3. Check audit logs for specific mismatch reasons
 4. Ensure entity status is "Active" (not "Removed", "Cancelled", etc.)
+```
+
+---
+
+## TASK 7: Post-Deployment Monitoring 📊 RECOMMENDED
+
+**Why**: Track API performance, errors, and usage in production
+
+### Option A: Vercel Analytics (Built-in, Free)
+
+**Setup**:
+1. Go to https://vercel.com/Butterdime/the-firm/analytics
+2. Enable "Web Analytics"
+3. Enable "Speed Insights" (optional)
+
+**What you get**:
+- Request volume and response times
+- Geographic distribution of requests
+- Error rates and status codes
+- Serverless function execution times
+
+### Option B: Sentry Error Tracking (Recommended for Production)
+
+**Setup**:
+```bash
+# Install Sentry
+npm install @sentry/node @sentry/integrations
+
+# Add to src/server.ts (top of file):
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 1.0,
+});
+
+# Add error handling middleware (bottom of file, before app.listen):
+app.use(Sentry.Handlers.errorHandler());
+```
+
+**Get Sentry DSN**:
+1. Sign up at https://sentry.io/signup/
+2. Create new project → Node.js/Express
+3. Copy DSN from project settings
+4. Add to Vercel environment variables: `SENTRY_DSN=https://...`
+
+**What you get**:
+- Real-time error alerts
+- Stack traces for debugging
+- User impact tracking
+- Performance monitoring
+
+### Option C: Custom Logging (Simple)
+
+**Setup**:
+```bash
+# Add to src/lib/logger.ts:
+export function logProduction(level: string, message: string, data?: any) {
+  if (process.env.NODE_ENV === 'production') {
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      data,
+      environment: 'production'
+    }));
+  }
+}
+
+# Use in routes:
+import { logProduction } from '../lib/logger';
+
+logProduction('info', 'Verification completed', {
+  verification_id: verificationId,
+  status: finalStatus
+});
+```
+
+**View logs**:
+```bash
+# In Vercel dashboard:
+# Deployments → Latest → Logs tab
+# Or use Vercel CLI:
+vercel logs https://the-firm.vercel.app
+```
+
+### Monitoring Checklist
+
+- [ ] Error rate < 1% of requests
+- [ ] Average response time < 3 seconds
+- [ ] Database connection stable (no timeouts)
+- [ ] Gemini API calls succeeding
+- [ ] ABR API lookups working
+- [ ] No memory leaks or crashes
+
+### Alerts to Set Up
+
+**Critical alerts**:
+1. API error rate > 5%
+2. Database connection failures
+3. Gemini API quota exceeded
+4. Response time > 10 seconds
+
+**Notification channels**:
+- Email alerts
+- Slack webhook (optional)
+- PagerDuty (for production systems)
+
+---
+
+## TASK 8: Rollback Plan 🔄 CRITICAL
+
+**Why**: Quick recovery if deployment introduces issues
+
+### When to Rollback
+
+**Immediate rollback if**:
+- ❌ API endpoints return 500 errors consistently
+- ❌ Database connection completely fails
+- ❌ Critical security vulnerability discovered
+- ❌ Data corruption in verification records
+
+**Consider rollback if**:
+- ⚠️ Error rate > 10%
+- ⚠️ Performance degraded significantly
+- ⚠️ User reports of verification failures
+
+### Rollback Method 1: Vercel Dashboard (Fastest - 30 seconds)
+
+**Steps**:
+1. Go to https://vercel.com/Butterdime/the-firm/deployments
+2. Find the last working deployment (before the problematic one)
+3. Click three dots (⋮) → "Promote to Production"
+4. Confirm promotion
+5. Wait ~30 seconds for rollback to complete
+
+**Verification**:
+```bash
+# Test API immediately
+curl https://the-firm.vercel.app/api/health
+
+# Check deployment URL matches old commit
+curl -I https://the-firm.vercel.app/ | grep x-vercel-id
+```
+
+### Rollback Method 2: Git Revert (Permanent fix - 2 minutes)
+
+**Steps**:
+```bash
+# Find the problematic commit
+git log --oneline -5
+
+# Revert the commit (creates new commit that undoes changes)
+git revert <commit-hash> --no-edit
+
+# Push to trigger new deployment
+git push origin main
+
+# Wait for Vercel auto-deploy (~2 minutes)
+```
+
+**Verification**:
+```bash
+# Check git history shows revert
+git log --oneline -3
+
+# Test API
+curl https://the-firm.vercel.app/api/health
+```
+
+### Rollback Method 3: Branch Switch (For major issues - 1 minute)
+
+**Steps**:
+```bash
+# Switch back to last known good commit
+git checkout <last-good-commit-hash>
+
+# Create emergency fix branch
+git checkout -b emergency-rollback
+
+# Force push to main (if you have permissions)
+git push origin emergency-rollback:main --force
+
+# Or create PR from emergency-rollback to main
+```
+
+**⚠️ Use with caution**: Force pushing can cause issues for other developers
+
+### Post-Rollback Actions
+
+**Immediate**:
+- [ ] Verify API is working correctly
+- [ ] Check error logs have decreased
+- [ ] Test critical endpoints (health, verify-document)
+- [ ] Monitor for 15 minutes to ensure stability
+
+**Within 1 hour**:
+- [ ] Investigate root cause of issue
+- [ ] Review deployment logs
+- [ ] Check environment variables weren't changed
+- [ ] Verify database schema is intact
+
+**Within 24 hours**:
+- [ ] Create bug report with reproduction steps
+- [ ] Fix the issue in development
+- [ ] Test fix thoroughly before redeploying
+- [ ] Document what went wrong and how it was fixed
+
+### Rollback Communication
+
+**If rollback affects users**:
+1. Post status update (if you have a status page)
+2. Notify team via Slack/email
+3. Log incident in incident tracking system
+4. Document timeline and actions taken
+
+### Rollback Testing
+
+**Before you need it, test rollback process**:
+```bash
+# In preview environment, practice rollback:
+1. Deploy a "broken" version to preview
+2. Practice rolling back in Vercel dashboard
+3. Time how long rollback takes
+4. Document any issues encountered
 ```
 
 ---
