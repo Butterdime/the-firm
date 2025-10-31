@@ -37,11 +37,26 @@ Go to https://vercel.com/Butterdime/the-firm/settings/environment-variables
 
 Add these variables:
 
+#### Required (v1 + v2):
 | Variable | Value | Where to Get It |
 |----------|-------|-----------------|
 | GEMINI_API_KEY | Your API key | https://aistudio.google.com/apikey |
 | DATABASE_URL | PostgreSQL URL | Railway or Vercel Postgres |
 | NODE_ENV | production | Just type this |
+
+#### v2 KYC Additional Variables:
+| Variable | Value | Where to Get It |
+|----------|-------|-----------------|
+| ABR_API_KEY | Your ABR GUID | https://abr.business.gov.au/ (register GUID) |
+| ABR_API_URL | https://abr.business.gov.au/abrxmlsearch/ABRXMLSearch.asmx | Default (optional) |
+| MONOOVA_API_KEY | Your Monoova API key | https://monoova.com/ (sandbox credentials) |
+| MONOOVA_API_SECRET | Your Monoova API secret | https://monoova.com/ |
+| MONOOVA_API_URL | https://api.monoova.com/v2 | Default (optional) |
+| MONOOVA_ENVIRONMENT | sandbox | Change to 'production' after testing |
+| MONTHLY_PAYID_BUDGET | 5 | Dollar amount (default: $5/month) |
+| ENABLE_NPP_PAYID | true | Set to 'false' to disable PayID |
+| ENABLE_VISUAL_AUTH | true | Set to 'false' to disable visual auth |
+| ENABLE_ABR_SEARCH | true | Set to 'false' to disable ABR entity discovery |
 
 ## Step 4: Set Up PostgreSQL Database
 
@@ -54,7 +69,11 @@ Add these variables:
 5. Run migration:
 
 ```bash
-psql "YOUR_DATABASE_URL" < /path/to/the-firm/migrations/001_schema.sql
+# Run v1 migration (if not already done)
+psql "YOUR_DATABASE_URL" < migrations/001_schema.sql
+
+# Run v2 migration (adds KYC tables)
+psql "YOUR_DATABASE_URL" < migrations/002_kyc_tables.sql
 ```
 
 ## Step 5: Verify It Works
@@ -64,9 +83,18 @@ After Vercel redeploys (automatic after merge):
 ```bash
 # Test health endpoint
 curl https://the-firm.vercel.app/health
+
+# Test v1 endpoint (should still work)
+curl -X POST https://the-firm.vercel.app/api/verify-document \
+  -F "document=@test.pdf"
+
+# Test v2 endpoint
+curl https://the-firm.vercel.app/api/kyc/verify-identity
 ```
 
-**Expected:** `{"status":"ok","timestamp":"..."}`
+**Expected:** Health check returns `{"status":"ok","timestamp":"..."}`
+
+**Note:** v2 endpoints require authentication/document upload - test with actual requests
 
 ## Time Estimate
 - Push & PR: 2 minutes
@@ -78,7 +106,10 @@ curl https://the-firm.vercel.app/health
 - ✅ API endpoints responding (no more 404)
 - ✅ Health check working
 - ✅ Database connected
-- ✅ Document verification functional
+- ✅ v1 Document verification functional (POST /api/verify-document)
+- ✅ v2 KYC endpoints accessible (POST /api/kyc/verify-identity)
+- ✅ Database migration v2 completed (all KYC tables exist)
+- ✅ Environment variables configured (ABR, Monoova, etc.)
 
 ## Troubleshooting
 

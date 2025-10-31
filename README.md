@@ -1,6 +1,6 @@
-# RPR CIS SCAN v1 - Document Verification API
+# RPR CIS SCAN v2 - Document Verification API
 
-Australian business entity verification system with **mismatched verification prevention**.
+Hybrid Individual KYC + Business Entity Verification system with **mismatched verification prevention**.
 
 ## Core Constraint
 
@@ -59,7 +59,89 @@ Server runs on `http://localhost:3000`
 
 ## API Endpoints
 
-### POST /api/verify-document
+### v2 KYC Endpoints (New)
+
+#### POST /api/kyc/verify-identity
+Verify individual identity and discover business entities.
+
+**Request:**
+```bash
+curl -X POST http://localhost:3000/api/kyc/verify-identity \
+  -F "document=@drivers_license.jpg" \
+  -F "full_name=John Smith" \
+  -F "dob=1990-01-01" \
+  -F "address=123 Main Street" \
+  -F "postcode=2000"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "individual_id": "uuid",
+  "identity_verified": true,
+  "verification_status": "approved",
+  "entities_discovered": [
+    {
+      "abn": "12345678901",
+      "acn": "123456789",
+      "business_name": "JOHN SMITH PTY LTD",
+      "entity_status": "Active"
+    }
+  ]
+}
+```
+
+#### POST /api/kyc/verify-residence
+Verify residential address from proof document.
+
+**Request:**
+```bash
+curl -X POST http://localhost:3000/api/kyc/verify-residence \
+  -F "document=@utility_bill.pdf" \
+  -F "individual_id=uuid-from-identity-verification"
+```
+
+#### POST /api/kyc/verify-bank-account
+Verify bank account with 1-5 documents.
+
+**Request:**
+```bash
+curl -X POST http://localhost:3000/api/kyc/verify-bank-account \
+  -F "documents=@bank_statement1.pdf" \
+  -F "documents=@bank_statement2.pdf" \
+  -F "individual_id=uuid" \
+  -F "payid_value=test@example.com" \
+  -F "payid_type=email"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "bank_verification_id": "uuid",
+  "verification_status": "approved",
+  "overall_confidence_score": 85,
+  "confidence_level": "HIGH",
+  "matched_entity_abn": "12345678901"
+}
+```
+
+#### GET /api/kyc/cdd-report/:individual_id
+Generate CDD report PDF.
+
+#### GET /api/kyc/review-queue
+List pending manual reviews.
+
+#### POST /api/kyc/review/:review_id/assign
+Assign review to accountant.
+
+#### POST /api/kyc/review/:review_id/complete
+Submit review decision.
+
+### v1 Business Entity Endpoints (Existing)
+
+#### POST /api/verify-document
 
 Upload document for entity verification.
 

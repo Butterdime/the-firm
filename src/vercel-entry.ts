@@ -5,6 +5,7 @@ import path from 'path';
 import verifyRouter from './routes/verify';
 import reportsRouter from './routes/reports';
 import analyticsRouter from './routes/analytics';
+import kycRouter from './routes/kyc';
 import { generalApiLimiter, healthCheckLimiter } from './middleware/rate-limiter';
 
 dotenv.config();
@@ -31,6 +32,8 @@ app.get('/health', healthCheckLimiter, (req, res) => {
 app.use('/api', generalApiLimiter, verifyRouter);
 app.use('/api/reports', generalApiLimiter, reportsRouter);
 app.use('/api/analytics', generalApiLimiter, analyticsRouter);
+// KYC routes (v2)
+app.use('/api/kyc', generalApiLimiter, kycRouter);
 
 // 404 handler
 app.use((req, res) => {
