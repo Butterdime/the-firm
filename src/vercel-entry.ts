@@ -1,7 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import verifyRouter from './routes/verify';
+import reportsRouter from './routes/reports';
+import analyticsRouter from './routes/analytics';
+import { generalApiLimiter, healthCheckLimiter } from './middleware/rate-limiter';
 
 dotenv.config();
 
@@ -12,16 +16,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
-app.get('/health', (req, res) => {
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Health check (with rate limiting)
+app.get('/health', healthCheckLimiter, (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
   });
 });
 
-// API routes
-app.use('/api', verifyRouter);
+// API routes (with rate limiting)
+app.use('/api', generalApiLimiter, verifyRouter);
+app.use('/api/reports', generalApiLimiter, reportsRouter);
+app.use('/api/analytics', generalApiLimiter, analyticsRouter);
 
 // 404 handler
 app.use((req, res) => {
