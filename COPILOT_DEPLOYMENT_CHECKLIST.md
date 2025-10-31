@@ -1,4 +1,4 @@
-# 🚀 CIS Platform Deployment Checklist for Copilot
+# 🚀 RPR CIS SCAN v1 Deployment Checklist for Copilot
 
 **Date Created**: October 30, 2025
 **Branch**: `claude/cis-security-audit-report-011CUcnea5CDCE8NQ9K9wWkw`

@@ -1,7 +1,7 @@
 {
-  "name": "cis-platform",
+  "name": "rpr-cis-scan-v1",
   "version": "1.0.0",
-  "description": "Document verification platform for Australian business entities",
+  "description": "RPR CIS SCAN v1 - Document verification platform for Australian business entities",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

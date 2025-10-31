@@ -1,7 +1,7 @@
-# CIS Platform Testing Guide
+# RPR CIS SCAN v1 Testing Guide
 
-**Version**: 1.0.0  
-**Date**: October 28, 2025  
+**Version**: 1.0.0
+**Date**: October 28, 2025
 **Platform**: Trilogy Verification System
 
 ---
