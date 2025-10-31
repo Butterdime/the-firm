@@ -1,31 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
+  "buildCommand": "npm install && npm run build",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@latest"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "api/index.ts"
-    },
-    {
-      "src": "/health",
-      "dest": "api/index.ts"
-    },
-    {
-      "src": "/(.*\\.(js|css|html|svg|png|jpg|jpeg|gif|webp))",
-      "dest": "public/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "api/index.ts"
-    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/health", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
