@@ -42,6 +42,9 @@
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },
+  "overrides": {
+    "glob": "^10.4.5"
+  },
   "engines": {
     "node": "18.x"
   }
