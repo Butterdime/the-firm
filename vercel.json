@@ -3,7 +3,7 @@
   "buildCommand": "npm install && npm run build",
   "functions": {
     "api/index.ts": {
-      "runtime": "@vercel/node"
+      "runtime": "@vercel/node@5.5.1"
     }
   },
   "rewrites": [
