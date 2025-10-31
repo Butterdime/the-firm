@@ -7,6 +7,7 @@ import { extractFromDocument } from '../lib/gemini-extraction';
 import { queryABR } from '../lib/abr-verification';
 import { verifyTrilogy, checkStaleness } from '../lib/trilogy-verification';
 import { logAuditEvent } from '../lib/audit-logger';
+import { verifyDocumentLimiter } from '../middleware/rate-limiter';
 
 const router = Router();
 
@@ -41,7 +42,7 @@ const upload = multer({
  * 6. Check document staleness
  * 7. Return result with complete audit trail
  */
-router.post('/verify-document', upload.single('document'), async (req: Request, res: Response) => {
+router.post('/verify-document', verifyDocumentLimiter, upload.single('document'), async (req: Request, res: Response) => {
   let documentId: string | null = null;
   let verificationId: string | null = null;
 
