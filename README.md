@@ -1,4 +1,4 @@
-# CIS Platform - Document Verification API
+# RPR CIS SCAN v1 - Document Verification API
 
 Australian business entity verification system with **mismatched verification prevention**.
 
