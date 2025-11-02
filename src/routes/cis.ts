@@ -442,7 +442,17 @@ async function performCrossVerification(extractedData: any[], customerType: stri
       // Only require ABN lookup if we have the necessary data
       if (entityName && postcode) {
         try {
-          const abrResult = await queryABR(null, { name: entityName, postcode });
+          // TODO: Implement name-based ABN lookup - for now skip this step
+          const abrResult = {
+            abn: null,
+            acn: null,
+            business_name: null,
+            entity_status: null,
+            entity_type: null,
+            raw_response: null,
+            lookup_successful: false,
+            lookup_errors: ['Name-based ABN lookup not yet implemented']
+          };
 
           if (abrResult.lookup_successful && abrResult.abn) {
             result.abnFound = true;
@@ -490,7 +500,7 @@ async function performCrossVerification(extractedData: any[], customerType: stri
   } catch (error: any) {
     result.status = 'error';
     result.message = `Cross-verification failed: ${error.message}`;
-    result.issues.push('Verification system error');
+    throw new Error("Verification system error" as any);
   }
 
   return result;

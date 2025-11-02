@@ -3,15 +3,19 @@ import pool from '../config/database';
 export interface AuditLogEntry {
   verification_id?: string | null;
   document_id: string | null;
-  event_type: 
-    | 'ocr_extraction' 
-    | 'abr_query' 
-    | 'trilogy_check' 
-    | 'manual_review' 
-    | 'approval' 
+  cis_session_id?: string;
+  event_type:
+    | 'ocr_extraction'
+    | 'abr_query'
+    | 'trilogy_check'
+    | 'manual_review'
+    | 'approval'
     | 'rejection'
-    | 'staleness_check';
-  decision_maker: 'system' | 'user';
+    | 'staleness_check'
+    | 'cross_verification'
+    | 'cis_generation'
+    | 'admin_approval';
+  decision_maker: 'system' | 'user' | 'admin';
   decision_result: 'pass' | 'fail' | 'warning' | 'flagged';
   decision_reason: string;
   data_snapshot: any;
