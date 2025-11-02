@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Click Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; }
+        .disabled { background: #999; }
+        .enabled { background: #00A896; color: white; }
+        pre { background: #f5f5f5; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Button Click Test - Debugging</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Basic Button Click</h3>
+        <button id="test-btn-1" class="enabled">Click Me</button>
+        <pre id="output-1">No clicks yet</pre>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Simulated Upload State</h3>
+        <button id="test-btn-2" class="disabled" disabled>Extract & Verify (Disabled)</button>
+        <button id="enable-btn">Simulate All Uploads</button>
+        <pre id="output-2">Button is disabled</pre>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: Check if fetch() works</h3>
+        <button id="test-btn-3" class="enabled">Test API Call</button>
+        <pre id="output-3">Not tested yet</pre>
+    </div>
+
+    <script>
+        // Test 1: Basic click
+        document.getElementById('test-btn-1').addEventListener('click', () => {
+            document.getElementById('output-1').textContent = 'Button clicked at: ' + new Date().toLocaleTimeString();
+            console.log('✅ Test 1: Basic click works');
+        });
+
+        // Test 2: Simulated upload
+        const uploadState = {
+            identity: null,
+            residence: null,
+            bank: [],
+            abn: null
+        };
+
+        document.getElementById('enable-btn').addEventListener('click', () => {
+            uploadState.identity = new File(['test'], 'id.pdf');
+            uploadState.residence = new File(['test'], 'residence.pdf');
+            uploadState.bank = [new File(['test'], 'bank.pdf')];
+            uploadState.abn = new File(['test'], 'abn.pdf');
+
+            const allUploaded = uploadState.identity && 
+                               uploadState.residence &&
+                               uploadState.bank.length > 0 && 
+                               uploadState.abn;
+
+            document.getElementById('output-2').textContent = 
+                'Upload state: ' + JSON.stringify({
+                    identity: !!uploadState.identity,
+                    residence: !!uploadState.residence,
+                    bank: uploadState.bank.length,
+                    abn: !!uploadState.abn,
+                    allUploaded: allUploaded
+                }, null, 2);
+
+            const btn = document.getElementById('test-btn-2');
+            btn.disabled = !allUploaded;
+            btn.className = allUploaded ? 'enabled' : 'disabled';
+            btn.textContent = allUploaded ? 'Extract & Verify (ENABLED)' : 'Extract & Verify (Disabled)';
+            
+            console.log('✅ Test 2: Upload simulation works, button state:', allUploaded ? 'ENABLED' : 'DISABLED');
+        });
+
+        document.getElementById('test-btn-2').addEventListener('click', async () => {
+            document.getElementById('output-2').textContent = '🔄 Button clicked! Starting verification...';
+            console.log('✅ Test 2: Button click works after enabling');
+            
+            setTimeout(() => {
+                document.getElementById('output-2').textContent = 'Button click successful!\nIn real app, this would call /api/verify-document';
+            }, 1000);
+        });
+
+        // Test 3: API call
+        document.getElementById('test-btn-3').addEventListener('click', async () => {
+            document.getElementById('output-3').textContent = '🔄 Testing API call...';
+            console.log('Testing API call...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                document.getElementById('output-3').textContent = 
+                    '✅ API call works!\n' + JSON.stringify(data, null, 2);
+                console.log('✅ Test 3: API call works');
+            } catch (error) {
+                document.getElementById('output-3').textContent = 
+                    '❌ API call failed:\n' + error.message;
+                console.error('❌ Test 3: API call failed:', error);
+            }
+        });
+
+        console.log('🚀 Test page loaded');
+    </script>
+</body>
+</html>
+

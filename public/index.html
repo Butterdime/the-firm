@@ -3,115 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPR CIS SCAN v1 - Document Verification</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>CIS Platform - Customer Information Sheet Generator</title>
+    <link rel="stylesheet" href="/cis-styles.css">
+    <!-- Load Babel for JSX transformation -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔍 RPR CIS SCAN v1</h1>
-            <p class="subtitle">Australian Business Document Verification System</p>
-        </header>
-
-        <main>
-            <section class="upload-section">
-                <h2>Upload Business Document</h2>
-                <p class="info">Upload an invoice, ABN registration, or incorporation certificate for verification</p>
-                
-                <form id="upload-form">
-                    <div class="drop-zone" id="drop-zone">
-                        <div class="drop-zone-content">
-                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <p class="drop-text">Drag & drop your document here</p>
-                            <p class="or-text">or</p>
-                            <label for="file-input" class="file-label">
-                                <span class="button">Browse Files</span>
-                                <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" required>
-                            </label>
-                            <p class="file-types">Supported: PDF, JPG, PNG, GIF, WEBP (max 10MB)</p>
-                        </div>
-                        <div class="file-info" id="file-info" style="display: none;">
-                            <p class="file-name" id="file-name"></p>
-                            <button type="button" class="remove-file" id="remove-file">✕ Remove</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="document-date">Document Date (Optional)</label>
-                        <input type="date" id="document-date" class="input-field">
-                        <small>When was this document issued? Used for staleness checks.</small>
-                    </div>
-
-                    <button type="submit" class="button button-primary" id="submit-btn">
-                        <span id="submit-text">Verify Document</span>
-                        <span id="submit-spinner" class="spinner" style="display: none;"></span>
-                    </button>
-                </form>
-            </section>
-
-            <section class="results-section" id="results-section" style="display: none;">
-                <h2>Verification Results</h2>
-                
-                <div class="status-card" id="status-card">
-                    <div class="status-header">
-                        <span class="status-icon" id="status-icon"></span>
-                        <span class="status-text" id="status-text"></span>
-                    </div>
-                    <p class="status-reason" id="status-reason"></p>
-                </div>
-
-                <div class="verification-details">
-                    <div class="detail-section">
-                        <h3>Extracted Data</h3>
-                        <div class="detail-grid" id="extracted-data"></div>
-                    </div>
-
-                    <div class="detail-section" id="abr-section">
-                        <h3>ABR Verified Data</h3>
-                        <div class="detail-grid" id="abr-data"></div>
-                    </div>
-
-                    <div class="detail-section" id="trilogy-section">
-                        <h3>Trilogy Verification Checks</h3>
-                        <div class="trilogy-checks" id="trilogy-checks"></div>
-                    </div>
-                </div>
-
-                <div class="audit-trail-section">
-                    <button class="collapsible" id="audit-toggle">
-                        <span>Show Audit Trail</span>
-                        <span class="arrow">▼</span>
-                    </button>
-                    <div class="audit-content" id="audit-content">
-                        <div id="audit-trail"></div>
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button class="button button-secondary" id="download-report">
-                        📄 Download CDD Report
-                    </button>
-                    <button class="button" id="verify-another">
-                        ↻ Verify Another Document
-                    </button>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p>
-                <a href="/dashboard.html">📊 View Analytics Dashboard</a> | 
-                <a href="/health" target="_blank">API Health</a>
-            </p>
-            <p class="compliance">Compliant with AUSTRAC Customer Due Diligence requirements</p>
-        </footer>
-    </div>
-
-    <script src="/app.js"></script>
+    <div id="root"></div>
+    <script type="text/babel" src="/cis-app.js"></script>
 </body>
 </html>
 

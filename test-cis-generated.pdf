@@ -1,0 +1,1 @@
+{"error":"CIS generation failed","message":"Cannot find module 'canvas'\nRequire stack:\n- /Users/puvansivanasan/Documents/CURSOR/the-firm/src/routes/cis.ts\n- /Users/puvansivanasan/Documents/CURSOR/the-firm/src/server.ts"}

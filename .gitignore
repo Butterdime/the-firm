@@ -8,3 +8,8 @@ uploads/*
 coverage/
 .vscode/
 .idea/
+# MCP Server
+mcp-server/.env
+mcp-server/dist/
+mcp-server/audit-logs/
+mcp-server/*.log

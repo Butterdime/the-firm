@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="test-token-local-dev">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self' https://cdn.jsdelivr.net;
+                   script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                   style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                   connect-src 'self' http://localhost:3000">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIS Document Upload & Verification</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-navy: #1E3A5F;
+            --accent-teal: #00A896;
+            --cool-gray: #BCC6D1;
+            --dark-gray: #333333;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+        }
+
+        .upload-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            color: var(--primary-navy);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--cool-gray);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--cool-gray);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 15px;
+            background: white;
+            display: block;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent-teal);
+            background: rgba(0, 168, 150, 0.05);
+        }
+
+        /* Optional zones styling */
+        .optional-zone {
+            border-color: #ccc !important;
+            background: #f9f9f9 !important;
+        }
+
+        .optional-zone:hover, .optional-zone.dragover {
+            border-color: #999 !important;
+            background: rgba(153, 153, 153, 0.05) !important;
+        }
+
+        .upload-zone.uploaded {
+            border-color: var(--success-green);
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--cool-gray);
+            margin-bottom: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--cool-gray);
+            margin-right: 10px;
+        }
+
+        .status-indicator.completed {
+            background: var(--success-green);
+            border-color: var(--success-green);
+        }
+
+        .section-header {
+            color: var(--accent-teal);
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .btn-extract {
+            background: var(--accent-teal);
+            color: white;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-extract:disabled {
+            background: var(--cool-gray);
+            cursor: not-allowed;
+        }
+
+        .btn-extract:not(:disabled):hover {
+            background: #008776;
+        }
+
+        .helper-text {
+            color: var(--cool-gray);
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .requirement-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .requirement-list li {
+            margin-bottom: 5px;
+        }
+
+        .client-info-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .client-info-section h5 {
+            color: var(--primary-navy);
+            margin-bottom: 20px;
+        }
+
+        /* Hexagon Form Fields */
+        .hexagon-field {
+            position: relative;
+            margin-bottom: 20px;
+            background: white;
+            border: 2px solid var(--cool-gray);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .hexagon-field:hover {
+            border-color: var(--accent-teal);
+            box-shadow: 0 4px 8px rgba(0, 168, 150, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .hexagon-field.focused {
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.1);
+        }
+
+        .hexagon-field.error {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .hexagon-icon {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            color: var(--accent-teal);
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 50%;
+            border: 2px solid var(--cool-gray);
+            transition: all 0.3s ease;
+        }
+
+        .hexagon-field:hover .hexagon-icon,
+        .hexagon-field.focused .hexagon-icon {
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+            transform: scale(1.1);
+        }
+
+        .hexagon-field.error .hexagon-icon {
+            border-color: var(--danger-red);
+            color: var(--danger-red);
+        }
+
+        .hexagon-label {
+            position: absolute;
+            top: -10px;
+            left: 60px;
+            background: white;
+            color: var(--primary-navy);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 8px;
+            transition: all 0.3s ease;
+        }
+
+        .hexagon-field:hover .hexagon-label,
+        .hexagon-field.focused .hexagon-label {
+            color: var(--accent-teal);
+        }
+
+        .hexagon-field.error .hexagon-label {
+            color: var(--danger-red);
+        }
+
+        .hexagon-input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 16px;
+            color: var(--dark-gray);
+            padding: 5px 0;
+            outline: none;
+        }
+
+        .hexagon-input::placeholder {
+            color: var(--cool-gray);
+            opacity: 0.7;
+        }
+
+        .hexagon-textarea {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 16px;
+            color: var(--dark-gray);
+            padding: 5px 0;
+            outline: none;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .hexagon-textarea::placeholder {
+            color: var(--cool-gray);
+            opacity: 0.7;
+        }
+
+        .hexagon-error {
+            position: absolute;
+            bottom: -25px;
+            left: 20px;
+            color: var(--danger-red);
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .hexagon-field.error .hexagon-error {
+            opacity: 1;
+        }
+
+        /* Override Bootstrap form styles */
+        .client-info-section .form-label,
+        .client-info-section .form-control {
+            display: none; /* Hide default Bootstrap styles */
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1 class="page-title">CIS Document Verification</h1>
+        <p class="subtitle">Upload business documents for Customer Information Sheet generation</p>
+
+        <!-- Document Upload Sections -->
+        <div id="required-docs-section">
+            
+            <!-- 1. Proof of Identity -->
+            <div class="section-header">
+                <span class="status-indicator" id="status-identity"></span>
+                1. Proof of Identity (ID - Driver's License or Passport)
+            </div>
+            <div class="upload-zone" id="zone-identity" data-doc-type="identity">
+                <div class="upload-icon">📄</div>
+                <p><strong>Drag & drop identity document here or click to browse</strong></p>
+                <p class="helper-text">Government-issued ID (PDF, JPG, PNG - Max 10MB)</p>
+            </div>
+            <input type="file" id="input-identity" accept=".pdf,.jpg,.jpeg,.png" hidden>
+
+            <!-- 2. Proof of Residence -->
+            <div class="section-header">
+                <span class="status-indicator" id="status-residence"></span>
+                2. Proof of Residence (Address Verification)
+            </div>
+            <div class="upload-zone" id="zone-residence" data-doc-type="proof_of_residence">
+                <div class="upload-icon">🏠</div>
+                <p><strong>Drag & drop address verification document here or click to browse</strong></p>
+                <p class="helper-text">Examples: Utility Bill, Lease Agreement, Rates Notice (Max 10MB)</p>
+            </div>
+            <input type="file" id="input-residence" accept=".pdf,.jpg,.jpeg,.png" hidden>
+
+            <!-- 3. Bank Statement -->
+            <div class="section-header">
+                <span class="status-indicator" id="status-bank"></span>
+                3. Bank Statement (Financial Profile & Account Verification)
+            </div>
+            <div class="upload-zone optional-zone" id="zone-bank" data-doc-type="bank_statement">
+                <div class="upload-icon">🏦</div>
+                <p><strong>Drag & drop bank statement here or click to browse</strong> <em>(Optional)</em></p>
+                <p class="helper-text">3-6 months of recent statements (PDF, JPG, PNG) - Multiple files allowed</p>
+                <p class="helper-text" style="font-size: 12px; color: #999;">
+                    Will extract: Account holder name, BSB, Account number, Transaction history
+                </p>
+            </div>
+            <input type="file" id="input-bank" accept=".pdf,.jpg,.jpeg,.png" multiple hidden>
+
+            <!-- 4. ABN Statement -->
+            <div class="section-header">
+                <span class="status-indicator" id="status-abn"></span>
+                4. ABN Statement (Entity Verification) <span style="color: var(--primary-navy); font-weight: bold;">- TRIGGERS TRILOGY VERIFICATION</span>
+            </div>
+            <div class="upload-zone optional-zone" id="zone-abn" data-doc-type="abn_statement">
+                <div class="upload-icon">📋</div>
+                <p><strong>Drag & drop ABN Lookup certificate here or click to browse</strong> <em>(Optional)</em></p>
+                <p class="helper-text">From Australian Business Register lookup (Max 10MB)</p>
+                <p class="helper-text" style="font-size: 12px; color: #008776; font-weight: 600;">
+                    ✓ When uploaded: System automatically extracts ABN, ACN, business name, and verifies against ABR
+                </p>
+            </div>
+            <input type="file" id="input-abn" accept=".pdf,.jpg,.jpeg,.png" hidden>
+        </div>
+
+        <!-- Upload Summary -->
+        <div id="upload-summary" style="margin-top: 40px;">
+            <h5 style="color: var(--primary-navy);">Upload Status</h5>
+            <ul class="list-unstyled">
+                <li id="summary-identity">❌ Proof of Identity: Not uploaded</li>
+                <li id="summary-residence">❌ Proof of Residence: Not uploaded</li>
+                <li id="summary-bank">❌ Bank Statement: Not uploaded</li>
+                <li id="summary-abn">❌ ABN Statement: Not uploaded</li>
+            </ul>
+        </div>
+
+        <!-- Client Information Form (Hidden initially) -->
+        <div id="client-info-section" class="client-info-section" style="display: none;">
+            <h5>Client Information</h5>
+            <p class="helper-text">Provide client details for Customer Information Sheet generation</p>
+
+            <form id="client-info-form">
+                <!-- Client Name Field -->
+                <div class="hexagon-field" id="field-client-name">
+                    <div class="hexagon-icon">👤</div>
+                    <div class="hexagon-label">Client Name *</div>
+                    <input type="text" class="hexagon-input" id="client-name" required
+                           placeholder="e.g., John Smith" maxlength="255">
+                    <div class="hexagon-error" id="error-client-name">Client name is required</div>
+                </div>
+
+                <!-- Date of Birth Field -->
+                <div class="hexagon-field" id="field-client-dob">
+                    <div class="hexagon-icon">🎂</div>
+                    <div class="hexagon-label">Date of Birth *</div>
+                    <input type="date" class="hexagon-input" id="client-dob" required
+                           placeholder="DD/MM/YYYY">
+                    <div class="hexagon-error" id="error-client-dob">Valid date of birth is required</div>
+                </div>
+
+                <!-- ID Number Field -->
+                <div class="hexagon-field" id="field-client-id-number">
+                    <div class="hexagon-icon">🆔</div>
+                    <div class="hexagon-label">ID Number *</div>
+                    <input type="text" class="hexagon-input" id="client-id-number" required
+                           placeholder="License/Passport number" maxlength="20">
+                    <div class="hexagon-error" id="error-client-id-number">Valid ID number is required (max 20 characters)</div>
+                </div>
+
+                <!-- Client Address Field -->
+                <div class="hexagon-field" id="field-client-address">
+                    <div class="hexagon-icon">🏠</div>
+                    <div class="hexagon-label">Client Address *</div>
+                    <textarea class="hexagon-textarea" id="client-address" required
+                              placeholder="e.g., 123 Business St, Sydney NSW 2000"></textarea>
+                    <div class="hexagon-error" id="error-client-address">Client address is required</div>
+                </div>
+
+                <!-- Relationship Start Date Field -->
+                <div class="hexagon-field" id="field-relationship-start">
+                    <div class="hexagon-icon">📅</div>
+                    <div class="hexagon-label">Relationship Start Date *</div>
+                    <input type="date" class="hexagon-input" id="relationship-start" required>
+                    <div class="hexagon-error" id="error-relationship-start">Valid relationship start date is required</div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Action Button -->
+        <div id="action-section" style="margin-top: 30px; text-align: center;">
+            <button id="btn-extract" class="btn-extract" disabled title="Upload all required documents first">
+                Extract Data & Verify
+            </button>
+            <p class="helper-text" id="btn-helper">Please upload all 4 required AUSTRAC CDD documents to proceed</p>
+
+            <!-- Manual Save Button (hidden initially) -->
+            <div id="manual-save-section" style="display: none; margin-top: 20px;">
+                <button id="btn-manual-save" class="btn btn-secondary" onclick="manualSavePDF()">
+                    💾 Save PDF As...
+                </button>
+                <p class="helper-text" style="margin-top: 5px; font-size: 12px; color: var(--cool-gray);">
+                    Choose where to save your PDF file
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/document-validation.js"></script>
+</body>
+</html>
+

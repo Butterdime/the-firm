@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .upload-zone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .upload-zone:hover { border-color: #00A896; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+    <h1>File Upload Single-Click Test</h1>
+    <p>Click the zone below and select the same file twice. It should work both times.</p>
+
+    <label class="upload-zone" for="test-file">
+        Click to select file
+    </label>
+    <input type="file" id="test-file" accept=".txt,.pdf">
+
+    <p id="result">No file selected</p>
+
+    <script>
+        const input = document.getElementById('test-file');
+        const result = document.getElementById('result');
+        const zone = document.querySelector('.upload-zone');
+
+        // Handle zone click (like in the main app)
+        zone.addEventListener('click', () => {
+            console.log('Zone clicked - resetting input value');
+            input.value = ''; // Reset value before opening dialog
+            input.click();
+        });
+
+        // Handle file selection
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                result.textContent = `Selected: ${file.name} (${file.size} bytes)`;
+                console.log('File selected:', file.name);
+            } else {
+                result.textContent = 'No file selected';
+            }
+        });
+    </script>
+</body>
+</html>

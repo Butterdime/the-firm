@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "platform-integrations": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/the-firm/mcp-server/dist/index.js"
+      ]
+    }
+  }
+}
+

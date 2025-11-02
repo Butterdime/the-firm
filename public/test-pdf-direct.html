@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct PDF Generation Test</title>
+    <style>
+        :root {
+            --primary-navy: #002B5B;
+            --accent-teal: #00A896;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: var(--primary-navy); }
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--accent-teal);
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-navy);
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background: var(--accent-teal);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #008776;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log-box {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-success { color: #166534; }
+        .log-error { color: #991b1b; }
+        .log-info { color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 Direct CIS PDF Generation Test</h1>
+        
+        <div class="info-box">
+            <strong>✅ Your button works!</strong> The verification API responded successfully.<br><br>
+            Since you don't have approved verifications yet, this page lets you test PDF generation directly by creating a test verification first.
+        </div>
+
+        <div class="form-group">
+            <label>Client Name *</label>
+            <input type="text" id="client-name" placeholder="e.g., John Smith" value="John Smith (Test)">
+        </div>
+
+        <div class="form-group">
+            <label>Client Address *</label>
+            <textarea id="client-address" placeholder="e.g., 123 Business St, Sydney NSW 2000">123 Test Street, Sydney NSW 2000</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Relationship Start Date *</label>
+            <input type="date" id="relationship-start" value="2024-01-01">
+        </div>
+
+        <div class="form-group">
+            <label>Business Name (for test verification)</label>
+            <input type="text" id="business-name" placeholder="e.g., Test Business Pty Ltd" value="Test Business Pty Ltd">
+        </div>
+
+        <div class="form-group">
+            <label>ABN (11 digits)</label>
+            <input type="text" id="abn" placeholder="e.g., 12345678901" value="12345678901" maxlength="11">
+        </div>
+
+        <div class="form-group">
+            <label>ACN (9 digits - optional)</label>
+            <input type="text" id="acn" placeholder="e.g., 123456789" value="123456789" maxlength="9">
+        </div>
+
+        <button id="btn-generate" onclick="generatePDF()">
+            🎯 Create Test Verification & Generate CIS PDF
+        </button>
+
+        <div id="log-box" class="log-box">
+            <div class="log-entry log-info">Ready to generate PDF...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logBox = document.getElementById('log-box');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight;
+            console.log(message);
+        }
+
+        async function generatePDF() {
+            const btn = document.getElementById('btn-generate');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            try {
+                // Get form values
+                const clientName = document.getElementById('client-name').value.trim();
+                const clientAddress = document.getElementById('client-address').value.trim();
+                const relationshipStart = document.getElementById('relationship-start').value;
+                const businessName = document.getElementById('business-name').value.trim();
+                const abn = document.getElementById('abn').value.trim();
+                const acn = document.getElementById('acn').value.trim();
+
+                // Validate
+                if (!clientName || !clientAddress || !relationshipStart || !businessName || !abn) {
+                    alert('Please fill in all required fields');
+                    btn.disabled = false;
+                    btn.textContent = '🎯 Create Test Verification & Generate CIS PDF';
+                    return;
+                }
+
+                if (abn.length !== 11 || !/^\d+$/.test(abn)) {
+                    alert('ABN must be exactly 11 digits');
+                    btn.disabled = false;
+                    btn.textContent = '🎯 Create Test Verification & Generate CIS PDF';
+                    return;
+                }
+
+                log('📤 Step 1: Creating test verification...', 'info');
+
+                // Use the new test endpoint that does everything in one step
+                log('📤 Generating CIS PDF (creating test verification + PDF)...', 'info');
+
+                const cisResponse = await fetch('/api/test-generate-cis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_name: clientName,
+                        client_address: clientAddress,
+                        relationship_start_date: relationshipStart,
+                        entity_name: businessName,
+                        entity_abn: abn,
+                        entity_acn: acn || null
+                    })
+                });
+
+                // Check response status
+                if (!cisResponse.ok) {
+                    let errorMsg;
+                    try {
+                        const error = await cisResponse.json();
+                        errorMsg = error.error || error.details || 'CIS generation failed';
+                    } catch {
+                        errorMsg = `Server returned status ${cisResponse.status}`;
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                // Verify content type
+                const contentType = cisResponse.headers.get('content-type');
+                log(`📦 Response content-type: ${contentType}`, 'info');
+                
+                if (!contentType || !contentType.includes('application/pdf')) {
+                    log(`⚠️ Warning: Expected PDF but got ${contentType}`, 'error');
+                    // Try to read as text to see error
+                    const text = await cisResponse.text();
+                    throw new Error(`Expected PDF but got: ${text.substring(0, 200)}`);
+                }
+
+                log('✅ CIS generated successfully!', 'success');
+                log('📥 Creating download link...', 'info');
+
+                // Download PDF with improved method
+                const blob = await cisResponse.blob();
+                log(`📦 PDF blob size: ${blob.size} bytes`, 'info');
+                
+                if (blob.size === 0) {
+                    throw new Error('Received empty PDF file');
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `CIS_${clientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                
+                document.body.appendChild(a);
+                log('🖱️ Triggering download...', 'info');
+                a.click();
+                
+                // Delay cleanup to ensure download starts
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    log('🧹 Cleaned up download link', 'info');
+                }, 500);
+
+                log('🎉 PDF download initiated successfully!', 'success');
+                log('📁 Check your Downloads folder for the PDF', 'success');
+                
+                alert('✅ SUCCESS!\n\nCIS PDF has been generated and download started!\n\n' +
+                      'Check your Downloads folder for:\n' +
+                      `CIS_${clientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf\n\n` +
+                      `File size: ${Math.round(blob.size / 1024 * 10) / 10} KB`);
+
+                btn.disabled = false;
+                btn.textContent = '🎯 Generate Another PDF';
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                alert(`Error: ${error.message}\n\nCheck the log box for details.`);
+                btn.disabled = false;
+                btn.textContent = '🎯 Try Again';
+            }
+        }
+    </script>
+</body>
+</html>
+

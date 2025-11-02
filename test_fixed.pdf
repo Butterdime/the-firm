@@ -1,0 +1,1 @@
+{"error":"Missing required document attachments","missing":["identity","address"],"message":"Identity and address documents are required. Bank and ABN documents are optional."}

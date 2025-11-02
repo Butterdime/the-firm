@@ -8,6 +8,7 @@ import { queryABR } from '../lib/abr-verification';
 import { verifyTrilogy, checkStaleness } from '../lib/trilogy-verification';
 import { logAuditEvent } from '../lib/audit-logger';
 import { verifyDocumentLimiter } from '../middleware/rate-limiter';
+import { saveUploadedFile } from '../lib/document-storage';
 
 const router = Router();
 
@@ -31,8 +32,63 @@ const upload = multer({
 });
 
 /**
+ * POST /api/validate-verification-id
+ *
+ * Validate that a verification ID exists or can be created
+ */
+router.post('/validate-verification-id', async (req: Request, res: Response) => {
+  try {
+    const { verification_id } = req.body;
+
+    if (!verification_id) {
+      return res.status(400).json({
+        error: 'verification_id is required',
+        valid: false
+      });
+    }
+
+    // Check if it exists in database
+    const existing = await pool.query(
+      'SELECT id FROM verifications WHERE id = $1',
+      [verification_id]
+    ).catch(() => ({ rows: [] }));
+
+    if (existing.rows.length > 0) {
+      return res.json({
+        valid: true,
+        exists: true,
+        verification_id
+      });
+    }
+
+    // For manual verification IDs (UUIDs that don't exist in DB),
+    // we consider them valid for creation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(verification_id)) {
+      return res.json({
+        valid: true,
+        exists: false,
+        verification_id
+      });
+    }
+
+    return res.status(400).json({
+      error: 'Invalid verification ID format',
+      valid: false
+    });
+
+  } catch (error: any) {
+    console.error('Verification ID validation error:', error);
+    res.status(500).json({
+      error: 'Verification ID validation failed',
+      valid: false
+    });
+  }
+});
+
+/**
  * POST /api/verify-document
- * 
+ *
  * Complete verification pipeline:
  * 1. Upload document
  * 2. Extract entity data (Gemini Vision)
@@ -300,6 +356,46 @@ router.post('/verify-document', verifyDocumentLimiter, upload.single('document')
       `UPDATE documents SET status = 'completed' WHERE id = $1`,
       [documentId]
     );
+
+    // If verification is approved, save the ABN document to disk for CIS generation
+    if (finalStatus === 'approved' && req.file && verificationId) {
+      try {
+        const stored = await saveUploadedFile(
+          req.file.buffer,
+          verificationId,
+          'abn',
+          req.file.originalname,
+          req.file.mimetype
+        );
+
+        // Store metadata in database
+        await pool.query(
+          `INSERT INTO verification_documents (
+            verification_id, document_type, filename, file_path, file_size, mime_type
+          ) VALUES ($1, $2, $3, $4, $5, $6)
+          ON CONFLICT (verification_id, document_type) 
+          DO UPDATE SET 
+            filename = EXCLUDED.filename,
+            file_path = EXCLUDED.file_path,
+            file_size = EXCLUDED.file_size,
+            mime_type = EXCLUDED.mime_type,
+            updated_at = CURRENT_TIMESTAMP`,
+          [
+            verificationId,
+            stored.document_type,
+            stored.filename,
+            stored.file_path,
+            stored.file_size,
+            stored.mime_type,
+          ]
+        );
+
+        console.log(`✅ Saved ABN document for approved verification ${verificationId}`);
+      } catch (error: any) {
+        console.error(`⚠️ Warning: Failed to save ABN document: ${error.message}`);
+        // Don't fail the verification if file save fails
+      }
+    }
 
     // Return complete result
     return res.status(200).json({

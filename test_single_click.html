@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Single Click File Upload Test</title>
+    <style>
+        .zone { border: 2px dashed #ccc; padding: 20px; margin: 10px; cursor: pointer; }
+        .zone:hover { border-color: blue; }
+        input[type="file"] { display: none; }
+        #result { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Single Click File Upload Test</h1>
+    <p>Click the zone below, select a file, then click again and select the same file. It should work both times.</p>
+
+    <div class="zone" id="zone">Click to select file</div>
+    <input type="file" id="file-input">
+
+    <div id="result">No file selected</div>
+
+    <script>
+        const zone = document.getElementById('zone');
+        const input = document.getElementById('file-input');
+        const result = document.getElementById('result');
+
+        zone.addEventListener('click', () => {
+            console.log('Zone clicked - resetting input value');
+            input.value = ''; // Reset to allow re-selecting same file
+            input.click();
+        });
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                result.textContent = `Selected: ${file.name} (${file.size} bytes)`;
+                console.log('File selected:', file.name);
+            } else {
+                result.textContent = 'No file selected';
+            }
+        });
+    </script>
+</body>
+</html>

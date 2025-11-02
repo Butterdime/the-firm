@@ -1,0 +1,1 @@
+{"error":"Failed to generate test CIS","details":"column \"document_hash\" of relation \"verifications\" does not exist"}

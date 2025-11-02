@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mismatch Review Dashboard - CIS Platform</title>
+    <link rel="stylesheet" href="/mismatch-styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>🔍 Mismatch Review Dashboard</h1>
+            <div class="header-controls">
+                <button id="refresh-btn" class="refresh-btn">🔄 Refresh</button>
+                <button id="settings-btn" class="settings-btn">⚙️ Settings</button>
+            </div>
+        </header>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="pending-count">0</div>
+                <div class="stat-label">Pending Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="critical-count">0</div>
+                <div class="stat-label">Critical Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="today-count">0</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approved-count">0</div>
+                <div class="stat-label">Approved</div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Verification Reports</h2>
+                <div class="filters">
+                    <select id="risk-filter">
+                        <option value="">All Risk Levels</option>
+                        <option value="critical_risk">Critical Risk</option>
+                        <option value="high_risk">High Risk</option>
+                        <option value="medium_risk">Medium Risk</option>
+                        <option value="low_risk">Low Risk</option>
+                        <option value="clear">Clear</option>
+                    </select>
+                    <select id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="reports-container">
+                <div id="reports-list" class="reports-list">
+                    <div class="loading-message">
+                        <div class="spinner"></div>
+                        <p>Loading verification reports...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Mismatch Detail Modal -->
+        <div id="mismatch-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Verification Report Details</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="mismatch-details">
+                        <!-- Details populated by JavaScript -->
+                    </div>
+                    <div class="mismatch-actions">
+                        <button id="approve-btn" class="action-btn approve">✅ Approve</button>
+                        <button id="reject-btn" class="action-btn reject">❌ Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejection Reason Modal -->
+        <div id="reject-modal" class="modal">
+            <div class="modal-content small-modal">
+                <div class="modal-header">
+                    <h3>Reject Verification</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="reject-reason">Reason for rejection:</label>
+                        <textarea id="reject-reason" placeholder="Please provide a reason for rejecting this verification..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="confirm-reject" class="action-btn reject">Confirm Rejection</button>
+                        <button id="cancel-reject" class="action-btn cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/mismatch-review.js"></script>
+</body>
+</html>

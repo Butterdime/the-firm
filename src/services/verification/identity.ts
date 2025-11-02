@@ -344,8 +344,31 @@ export async function verifyIdentity(
         RETURNING id
       `, [customerData.full_name, customerDOB, customerData.address, customerData.postcode]);
 
+      const individualId = individual.rows[0].id;
+
+      // Log audit trail for rejection (CRITICAL: complete audit coverage)
+      await logAuditEvent({
+        verification_id: null,
+        document_id: null,
+        event_type: 'rejection',
+        decision_maker: 'system',
+        decision_result: 'fail',
+        decision_reason: `Identity validation failed: ${validation.mismatch_reasons.join(', ')}`,
+        data_snapshot: {
+          individual_id: individualId,
+          name: customerData.full_name,
+          name_match: validation.name_match,
+          dob_match: validation.dob_match,
+          address_match: validation.address_match,
+          mismatch_reasons: validation.mismatch_reasons,
+          extracted_name: extracted.extracted_name,
+          extracted_dob: extracted.extracted_dob,
+          document_type: extracted.document_type,
+        },
+      });
+
       return {
-        individual_id: individual.rows[0].id,
+        individual_id: individualId,
         identity_verified: false,
         name_match: validation.name_match,
         dob_match: validation.dob_match,
@@ -404,23 +427,25 @@ export async function verifyIdentity(
       );
     }
 
-    // Step 7: Log audit trail (using existing audit logger format)
-    // Note: For KYC, we'll extend audit logs to support individual_id as resource
-    await pool.query(`
-      INSERT INTO audit_logs (
-        verification_id, document_id, event_type,
-        decision_maker, decision_result, decision_reason,
-        data_snapshot
-      ) VALUES ($1, NULL, 'approval', 'system', 'pass', $2, $3)
-    `, [
-      null, // verification_id not applicable for KYC identity verification
-      `Identity verified. ${entities.length} business entities discovered.`,
-      JSON.stringify({ 
+    // Step 7: Log audit trail (using consistent audit logger)
+    await logAuditEvent({
+      verification_id: null,
+      document_id: null,
+      event_type: 'approval',
+      decision_maker: 'system',
+      decision_result: 'pass',
+      decision_reason: `Identity verified. ${entities.length} business entities discovered.`,
+      data_snapshot: {
         individual_id: individualId,
-        name: extracted.extracted_name, 
-        entities_found: entities.length 
-      }),
-    ]);
+        name: extracted.extracted_name,
+        dob: extracted.extracted_dob,
+        address: extracted.extracted_address,
+        postcode: extracted.extracted_postcode,
+        document_type: extracted.document_type,
+        entities_found: entities.length,
+        entities: entities.map(e => ({ abn: e.abn, business_name: e.business_name })),
+      },
+    });
 
     return {
       individual_id: individualId,

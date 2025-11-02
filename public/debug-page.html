@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ultra Simple Button Test</title>
+</head>
+<body style="padding: 40px; font-family: Arial;">
+    <h1>Ultra Simple Button Test</h1>
+    <p id="output">Waiting...</p>
+    <button id="test-btn" style="padding: 20px 40px; font-size: 18px; background: #00A896; color: white; border: none; border-radius: 6px; cursor: pointer;">
+        CLICK ME
+    </button>
+    
+    <script>
+        // Test 1: Does page load?
+        document.getElementById('output').textContent = 'Page loaded successfully!';
+        console.log('✅ Page loaded');
+        
+        // Test 2: Does button exist?
+        const btn = document.getElementById('test-btn');
+        if (btn) {
+            document.getElementById('output').textContent += '\n✅ Button found!';
+            console.log('✅ Button found');
+        }
+        
+        // Test 3: Can we add event listener?
+        try {
+            btn.addEventListener('click', function() {
+                document.getElementById('output').textContent = '🎉 BUTTON CLICKED! Time: ' + new Date().toLocaleTimeString();
+                console.log('🎉 BUTTON CLICKED!');
+                alert('SUCCESS! The button works!');
+            });
+            document.getElementById('output').textContent += '\n✅ Event listener added!';
+            console.log('✅ Event listener added');
+        } catch (error) {
+            document.getElementById('output').textContent += '\n❌ Error: ' + error.message;
+            console.error('❌ Error:', error);
+        }
+    </script>
+</body>
+</html>

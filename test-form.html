@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form Debug</title>
+</head>
+<body>
+    <h1>Upload State Test</h1>
+    <button id="test-upload">Test Upload States</button>
+    <pre id="output"></pre>
+
+    <script>
+        // Simulate upload state
+        const uploadState = {
+            identity: null,
+            residence: null,
+            bank: [],
+            abn: null
+        };
+
+        document.getElementById('test-upload').addEventListener('click', () => {
+            const output = document.getElementById('output');
+            
+            // Test 1: Empty state
+            output.textContent += 'Test 1: All empty\n';
+            output.textContent += `identity: ${uploadState.identity}\n`;
+            output.textContent += `residence: ${uploadState.residence}\n`;
+            output.textContent += `bank.length: ${uploadState.bank.length}\n`;
+            output.textContent += `abn: ${uploadState.abn}\n`;
+            const test1 = uploadState.identity && uploadState.residence && uploadState.bank.length > 0 && uploadState.abn;
+            output.textContent += `Result: ${test1} (should be false)\n\n`;
+
+            // Test 2: Simulate uploads
+            uploadState.identity = new File(['test'], 'id.pdf');
+            uploadState.residence = new File(['test'], 'residence.pdf');
+            uploadState.bank = [new File(['test'], 'bank.pdf')];
+            uploadState.abn = new File(['test'], 'abn.pdf');
+            
+            output.textContent += 'Test 2: All uploaded\n';
+            output.textContent += `identity: ${uploadState.identity !== null}\n`;
+            output.textContent += `residence: ${uploadState.residence !== null}\n`;
+            output.textContent += `bank.length: ${uploadState.bank.length}\n`;
+            output.textContent += `abn: ${uploadState.abn !== null}\n`;
+            const test2 = uploadState.identity && uploadState.residence && uploadState.bank.length > 0 && uploadState.abn;
+            output.textContent += `Result: ${test2} (should be true)\n`;
+        });
+    </script>
+</body>
+</html>
+
